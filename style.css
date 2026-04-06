@@ -34,10 +34,17 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     background-color: var(--primary-light);
 }
 
-/* 強制側邊欄的 columns 不要在手機板換行 */
+/* 強制側邊欄的 columns 不要在手機板換行，並確保內容垂直居中 */
 [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
     flex-wrap: nowrap !important;
     gap: 0.5rem !important;
+    align-items: center !important;
+}
+
+/* 移除側邊欄頂部標題的邊距，避免造成對齊問題 */
+[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] h3 {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* 針對側邊欄刪除按鈕的特別樣式，縮小字體與間距以免擠壓 */

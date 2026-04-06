@@ -158,11 +158,13 @@ def due_date_label(due_date_str):
 # ===================== Sidebar =====================
 with st.sidebar:
     # 頂部：標題 + 夜間模式切換
-    tcol1, tcol2 = st.columns([3, 1])
+    # 使用 vertical_alignment="center" 確保標題與開關在任何螢幕尺寸下都對齊
+    tcol1, tcol2 = st.columns([0.7, 0.3], vertical_alignment="center")
     with tcol1:
         st.markdown("### ✅ To Do")
     with tcol2:
-        st.toggle("🌙", key="dark_mode", label_visibility="collapsed")
+        # 使用 🌓 圖示代替純月亮，並隱藏標籤文字以維持精簡
+        st.toggle("🌓", key="dark_mode", label_visibility="collapsed")
 
     # 搜尋
     search_input = st.text_input(
