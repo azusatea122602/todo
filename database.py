@@ -158,10 +158,12 @@ def get_important_tasks():
 
 
 def get_my_day_tasks():
+    today = datetime.date.today().isoformat()
     conn = get_connection()
     result = _task_rows(
         conn,
-        "SELECT * FROM tasks WHERE my_day = 1 ORDER BY is_completed, created_at DESC",
+        "SELECT * FROM tasks WHERE my_day = 1 OR due_date = ? ORDER BY is_completed, created_at DESC",
+        (today,),
     )
     conn.close()
     return result
@@ -259,6 +261,13 @@ def update_task_title(task_id, title):
     conn.close()
 
 
+def update_task_list(task_id, new_list_id):
+    conn = get_connection()
+    conn.execute("UPDATE tasks SET list_id = ? WHERE id = ?", (new_list_id, task_id))
+    conn.commit()
+    conn.close()
+
+
 def delete_task(task_id):
     conn = get_connection()
     conn.execute("DELETE FROM subtasks WHERE task_id = ?", (task_id,))
@@ -325,9 +334,11 @@ def get_important_count():
 
 
 def get_my_day_count():
+    today = datetime.date.today().isoformat()
     conn = get_connection()
     row = conn.execute(
-        "SELECT COUNT(*) FROM tasks WHERE my_day = 1 AND is_completed = 0"
+        "SELECT COUNT(*) FROM tasks WHERE (my_day = 1 OR due_date = ?) AND is_completed = 0",
+        (today,),
     ).fetchone()
     conn.close()
     return row[0] if row else 0

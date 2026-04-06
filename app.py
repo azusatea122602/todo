@@ -117,6 +117,24 @@ def _cb_save_notes(task_id, key_prefix=""):
     db.update_task_notes(task_id, val)
 
 
+def _cb_move_task(task_id, key_prefix=""):
+    key = f"{key_prefix}move_{task_id}"
+    selected_label = st.session_state.get(key)
+    if selected_label:
+        all_user_lists = db.get_all_lists()
+        list_opts = {f"{l.get('icon','📁')} {l['name']}": l['id'] for l in all_user_lists}
+        new_lid = list_opts.get(selected_label)
+        if new_lid:
+            db.update_task_list(task_id, new_lid)
+
+
+def _cb_rename_list(list_id):
+    key = f"rename_list_{list_id}"
+    new_name = st.session_state.get(key, "").strip()
+    if new_name:
+        db.rename_list(list_id, new_name)
+
+
 # ===================== 輔助函式 =====================
 def due_date_label(due_date_str):
     """回傳人類可讀的到期日文字。"""
@@ -139,7 +157,12 @@ def due_date_label(due_date_str):
 
 # ===================== Sidebar =====================
 with st.sidebar:
-    st.markdown("## ✅ To Do")
+    # 頂部：標題 + 夜間模式切換
+    tcol1, tcol2 = st.columns([3, 1])
+    with tcol1:
+        st.markdown("### ✅ To Do")
+    with tcol2:
+        st.toggle("🌙", key="dark_mode", label_visibility="collapsed")
 
     # 搜尋
     search_input = st.text_input(
@@ -211,14 +234,15 @@ with st.sidebar:
         label = f'{icon}  {lst["name"]}  ({count})' if count else f'{icon}  {lst["name"]}'
 
         if lst["is_smart"]:
-            # 智慧清單不提供刪除按鈕
+            # 智慧清單
             if st.button(label, key=f"list_{lst['id']}", use_container_width=True):
                 st.session_state.selected_view = "list"
                 st.session_state.selected_list_id = lst["id"]
                 st.session_state.search_keyword = ""
                 st.rerun()
         else:
-            col_btn, col_del = st.columns([5, 1])
+            # 自訂清單：使用 columns，並確保比例足以容納刪除按鈕
+            col_btn, col_del = st.columns([0.8, 0.2])
             with col_btn:
                 if st.button(label, key=f"list_{lst['id']}", use_container_width=True):
                     st.session_state.selected_view = "list"
@@ -241,9 +265,6 @@ with st.sidebar:
         label_visibility="collapsed",
         on_change=_cb_add_list,
     )
-
-    st.markdown("---")
-    st.checkbox("🌙 夜間模式", key="dark_mode")
 
 
 # ===================== 載入任務 =====================
@@ -291,7 +312,20 @@ completed_tasks = [t for t in tasks if t["is_completed"]]
 
 
 # ===================== 主工作區 =====================
-st.markdown(f"### {page_title}")
+# 如果是自訂清單，顯示可編輯的標題
+if view == "list" and target_list_id:
+    list_name = db.get_list_name(target_list_id)
+    st.text_input(
+        "清單名稱",
+        value=list_name,
+        key=f"rename_list_{target_list_id}",
+        on_change=_cb_rename_list,
+        args=(target_list_id,),
+        label_visibility="collapsed"
+    )
+else:
+    st.markdown(f"### {page_title}")
+
 st.caption(f"{datetime.date.today().strftime('%Y 年 %m 月 %d 日')}  ·  {len(active_tasks)} 個待辦")
 
 # --- 新增任務區塊 ---
@@ -452,14 +486,33 @@ def render_task(task, is_in_completed_section=False):
             args=(task["id"], prefix),
         )
 
-        # 底部：刪除 + 建立時間
+        # 底部：移動 / 刪除 / 建立時間
         st.markdown("---")
-        bc1, bc2 = st.columns([1, 3])
+        bc1, bc2, bc3 = st.columns([2, 1, 2])
+        
         with bc1:
-            if st.button("🗑️ 刪除任務", key=f"{prefix}del_{task['id']}", use_container_width=True):
+            # 移動到其他清單
+            all_user_lists = db.get_all_lists()
+            list_opts = {f"{l.get('icon','📁')} {l['name']}": l['id'] for l in all_user_lists}
+            # 找到當前所在的清單名稱作為預設值
+            current_list_name = next((k for k, v in list_opts.items() if v == task['list_id']), list(list_opts.keys())[0])
+            
+            st.selectbox(
+                "📁 移動到...",
+                options=list(list_opts.keys()),
+                index=list(list_opts.keys()).index(current_list_name),
+                key=f"{prefix}move_{task['id']}",
+                on_change=_cb_move_task,
+                args=(task['id'], prefix),
+                label_visibility="collapsed"
+            )
+            
+        with bc2:
+            if st.button("🗑️ 刪除", key=f"{prefix}del_{task['id']}", use_container_width=True):
                 db.delete_task(task["id"])
                 st.rerun()
-        with bc2:
+                
+        with bc3:
             created = task["created_at"][:16].replace("T", " ")
             st.caption(f"建立於 {created}")
 
