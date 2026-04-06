@@ -163,8 +163,8 @@ with st.sidebar:
     with tcol1:
         st.markdown("### ✅ To Do")
     with tcol2:
-        # 使用 🌓 圖示代替純月亮，並隱藏標籤文字以維持精簡
-        st.toggle("🌓", key="dark_mode", label_visibility="collapsed")
+        # 使用 🌓 圖示作為標籤，不隱藏標籤，以便圖示能正常顯示
+        st.toggle("🌓", key="dark_mode")
 
     # 搜尋
     search_input = st.text_input(
@@ -328,7 +328,7 @@ if view == "list" and target_list_id:
 else:
     st.markdown(f"### {page_title}")
 
-st.caption(f"{datetime.date.today().strftime('%Y 年 %m 月 %d 日')}  ·  {len(active_tasks)} 個待辦")
+st.caption(f"{datetime.date.today().strftime('%Y年%m月%d日')} · {len(active_tasks)}個待辦")
 
 # --- 新增任務區塊 ---
 if allow_add:

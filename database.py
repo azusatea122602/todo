@@ -108,7 +108,7 @@ def add_list(name, icon="📁"):
 
 def rename_list(list_id, new_name):
     conn = get_connection()
-    conn.execute("UPDATE lists SET name = ? WHERE id = ? AND is_smart = 0", (new_name, list_id))
+    conn.execute("UPDATE lists SET name = ? WHERE id = ?", (new_name, list_id))
     conn.commit()
     conn.close()
 
