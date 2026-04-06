@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+}
+
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+/* 移除了 header {visibility: hidden;} 以保留手機端左上角的導覽列展開按鈕 */
+
+:root {
+    --primary: #4A90D9;
+    --primary-light: #E8F0FE;
+    --border: #E5E7EB;
+    --text-muted: #9CA3AF;
+    --danger: #EF4444;
+}
+
+/* 讓預設為透明的背景，依賴 Streamlit theme (config.toml) 來畫出側邊欄的顏色 */
+section[data-testid="stSidebar"] .stButton > button {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    transition: background-color 0.15s ease;
+    min-height: 44px;
+}
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: var(--primary-light);
+}
+
+.main .block-container {
+    max-width: 900px;
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+div[data-testid="stExpander"] {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.15s ease;
+}
+div[data-testid="stExpander"]:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.stButton > button {
+    min-height: 44px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+@media (max-width: 768px) {
+    .main .block-container {
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+        padding-top: 0.8rem;
+    }
+    input, textarea, select {
+        font-size: 16px !important;
+    }
+    .stCheckbox label {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 4px 0;
+    }
+    .stButton > button {
+        min-height: 48px;
+        margin-bottom: 4px;
+    }
+}
